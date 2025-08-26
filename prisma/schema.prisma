@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  householdId   String?
+  household     Household? @relation(fields: [householdId], references: [id])
+  
+  ingredients   Ingredient[]
+  recipes       Recipe[]
+  wasteRecords  FoodWaste[]
+}
+
+model Household {
+  id            String    @id @default(cuid())
+  name          String
+  joinCode      String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  members       User[]
+  wasteGoal     Float?    @default(10)
+}
+
+model Ingredient {
+  id            String    @id @default(cuid())
+  name          String
+  quantity      Float
+  unit          String
+  category      String
+  expiryDate    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model Recipe {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  ingredients   Json
+  instructions  Json
+  prepTime      Int?
+  cookTime      Int?
+  servings      Int?
+  difficulty    String?
+  cuisine       String?
+  savedIngredients String[]
+  createdAt     DateTime  @default(now())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model FoodWaste {
+  id            String    @id @default(cuid())
+  ingredientName String
+  quantity      Float
+  unit          String
+  reason        String?
+  wastedAt      DateTime  @default(now())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
