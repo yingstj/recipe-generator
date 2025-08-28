@@ -100,10 +100,9 @@ export default function IngredientManager() {
 
   const isExpired = (expiryDate: string | null) => {
     if (!expiryDate) return false
-    const expiry = new Date(expiryDate)
+    const expiry = new Date(expiryDate + 'T23:59:59')
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    expiry.setHours(0, 0, 0, 0)
+    today.setHours(23, 59, 59, 999)
     return expiry < today
   }
 
