@@ -90,13 +90,21 @@ export default function IngredientManager() {
 
   const isExpiringSoon = (expiryDate: string | null) => {
     if (!expiryDate) return false
-    const daysUntil = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-    return daysUntil <= 3 && daysUntil >= 0
+    const expiry = new Date(expiryDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    expiry.setHours(0, 0, 0, 0)
+    const daysUntil = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    return daysUntil <= 3 && daysUntil > 0
   }
 
   const isExpired = (expiryDate: string | null) => {
     if (!expiryDate) return false
-    return new Date(expiryDate) < new Date()
+    const expiry = new Date(expiryDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    expiry.setHours(0, 0, 0, 0)
+    return expiry < today
   }
 
   return (
@@ -152,13 +160,17 @@ export default function IngredientManager() {
             <option value="spices">Spices</option>
             <option value="other">Other</option>
           </select>
-          <input
-            type="date"
-            name="expiryDate"
-            value={formData.expiryDate}
-            onChange={handleChange}
-            className="input-field"
-          />
+          <div>
+            <input
+              type="date"
+              name="expiryDate"
+              value={formData.expiryDate}
+              onChange={handleChange}
+              className="input-field"
+              placeholder="Expiry date (optional)"
+            />
+            <p className="text-xs text-gray-500 mt-1">Optional - track expiry dates</p>
+          </div>
           <button
             type="submit"
             disabled={loading}
