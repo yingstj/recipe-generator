@@ -11,10 +11,49 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const ingredients = await prisma.ingredient.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
+    // Get user with household info
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { household: true }
     })
+
+    let ingredients
+
+    if (user?.householdId) {
+      // If user is in a household, get all household members' ingredients
+      ingredients = await prisma.ingredient.findMany({
+        where: {
+          user: {
+            householdId: user.householdId
+          }
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    } else {
+      // If not in household, just get user's own ingredients
+      ingredients = await prisma.ingredient.findMany({
+        where: { userId: session.user.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    }
 
     return NextResponse.json({ ingredients })
   } catch (error) {

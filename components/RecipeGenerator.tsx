@@ -86,10 +86,14 @@ export default function RecipeGenerator() {
       if (response.ok) {
         const data = await response.json()
         setRecipe(data.recipe)
+      } else {
+        const error = await response.json()
+        console.error("Recipe generation error:", error)
+        alert(error.error || "Failed to generate recipe. Please try again.")
       }
     } catch (error) {
       console.error("Error generating recipe:", error)
-      alert("Failed to generate recipe. Please try again.")
+      alert("Failed to generate recipe. Please check your connection and try again.")
     } finally {
       setLoading(false)
     }
